@@ -2,12 +2,17 @@ module parser
 open FParsec
 open NeoSmart.Unicode
 
-type CalcNode =
+type CalcNumType = 
         | CalcInt of int
         | CalcFloat of float
-        | CalcOperator of oper: string * args: CalcNode list
+
+type CalcNode =
+        | CalcNum of CalcNumType
         | CalcIdentifier of string
+        | CalcExpression of oper: string * args: CalcNode list
+        | CalcFunction of args: string list * CalcNode
         | CalcString of string
+        | CalcBuiltin of (list<CalcNode> -> CalcNode)
 
 module constants = 
     let digits = ["0️⃣"; "1️⃣"; "2️⃣"; "3️⃣"; "4️⃣"; "5️⃣"; "6️⃣"; "7️⃣"; "8️⃣"; "9️⃣"]
@@ -26,10 +31,10 @@ let emoji_identifier_start = Set.difference emoji_set (new Set<string>(constants
 
 let pidentifier_start = choice (List.map pstring <| Seq.toList emoji_identifier_start)
 let pidentifier_suffix = choice (List.map pstring <| Seq.toList emoji_identifier)
-let pidentifier = pidentifier_start .>>. many1 pidentifier_suffix |>> (fun x -> CalcIdentifier (fst x + (Seq.fold (+) "" (snd x))))
-
+let pidentifier_raw = pidentifier_start .>>. many pidentifier_suffix |>> (fun x -> (fst x + (Seq.fold (+) "" (snd x))))
+let pidentifier = pidentifier_raw |>>  CalcIdentifier 
 // wip code
-let opers = ["➕"; "➖"; "✖"; "➗"]
+let opers = ["➕"; "➖"; "❌"; "➗"]
 
 
 
@@ -37,8 +42,6 @@ let opers = ["➕"; "➖"; "✖"; "➗"]
 
 
 let max_emoji_codepoint_length = 10 
-
-let poper = choice (List.map pstring opers)
 
 let pedigit = choice (List.map pstring constants.digits)
 
@@ -60,9 +63,9 @@ let pefloat = many1 pedigit .>> pedot .>>. many1 pedigit
 
 let pcalcnode, pcalcnoderef = createParserForwardedToRef<CalcNode, unit>()
 
-let pcalcint = peint |>> CalcInt
-let pcalcfloat = pefloat |>> CalcFloat
-let pcalcoperator = (pstring constants.lbracket >>. poper .>>. many1 (pstring constants.comma >>. pcalcnode) .>> pstring constants.rbracket) |>> CalcOperator
+let pcalcint = peint |>> CalcInt |>> CalcNum
+let pcalcfloat = pefloat |>> CalcFloat |>> CalcNum
+let pcalcoperator = (pstring constants.lbracket >>. pidentifier_raw .>>. many1 (pstring constants.comma >>. pcalcnode) .>> pstring constants.rbracket) |>> CalcExpression
 
 do pcalcnoderef.Value <- choice (List.map attempt
     [
@@ -72,4 +75,8 @@ do pcalcnoderef.Value <- choice (List.map attempt
         pcalcoperator;
         pidentifier;
     ])
-let build_ast = run pcalcoperator
+let build_ast line = 
+    let r = run pcalcoperator line 
+    match r with
+    | Success(result, _, _)   -> result
+    | Failure(errorMsg, _, _) -> failwith errorMsg
