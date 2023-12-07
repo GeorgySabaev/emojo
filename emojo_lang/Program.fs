@@ -40,8 +40,26 @@ let calc_divide args =
     | _ -> failwith $"Incorrect operand count for division: expected 2, got {args.Length}."
 
 let calc_sum args = List.reduce calc_sum2 args
+let calc_print (args: CalcNode list) =
+    match args with
+    | [arg] -> 
+        match arg with 
+        | CalcString s -> printf "%s" s
+        | CalcNum num -> 
+            match num with
+            | CalcInt i -> printf "%d" i
+            | CalcFloat f -> printf "%f" f
+        | CalcNone -> printf "None"
+        | _ -> invalidstate ()
+        CalcNone
+    | _ -> failwith $"Incorrect operand count for print: expected 1, got {args.Length}." 
+    
 
+let builtins: Map<string,CalcNode> = Map [("➕",CalcBuiltin(calc_sum));("➖",CalcBuiltin(calc_minus));("➗",CalcBuiltin(calc_divide));("🖨️",CalcBuiltin(calc_print))]
+let test1 = "🧽⬅️▶️➕⏸️🧵Hello 🧵⏸️🧵world!🧵◀️⏹️"
+let test2 = "🧽⬅️3️⃣⏹️"
+let test3 = "🕳️⬅️▶️🖨️⏸️🧵Hello world!🧵◀️⏹️"
 
-let builtins: Map<string,CalcNode> = Map [("➕",CalcBuiltin(calc_sum));]
-
-printf "%A" (evaluate_expr builtins (parser.build_ast "▶️➕⏸️🧵Hello 🧵⏸️🧵world!🧵◀️"))
+let test4 = "🕳️⬅️▶️🖨️⏸️3️⃣◀️⏹️"
+let test5 = "Void result of expression -->🕳️⬅️Start expression -->▶️🖨️<-- Print argument⏸️🧵Hello world!🧵<--String literal◀️⏹️<--End of program"
+let parseline = evaluate_line builtins (parser.build_ast test5)

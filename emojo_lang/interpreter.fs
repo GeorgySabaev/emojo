@@ -42,3 +42,10 @@ let rec evaluate_expr (context: Map<string, CalcNode>) ast =
         else
             failwith $"Variable not defined: %s{x}"
     | _ -> invalidstate()
+
+let evaluate_line context  parsed= 
+    match parsed with
+    | CalcIdentifier x, ast -> Map.add x (evaluate_expr context ast) context
+    | _, ast -> 
+        ignore (evaluate_expr context ast)
+        context
