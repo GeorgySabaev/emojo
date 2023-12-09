@@ -1,0 +1,32 @@
+💠⬅️ factorial function (recursive)
+    🆕 function definition
+        💠⏸️
+        🛑⏸️ stopper
+        🅰️⏸️ aggregator
+        ♻️ curr
+    ➡️ function body
+        ❓ if
+            ▶️⚖️⏸️▶️➕⏸️🛑⏸️1️⃣◀️⏸️♻️◀️  curr=stopper+1:
+        ⏸️ then
+            🅰️ return aggregator
+        ⏸️ else:
+            ▶️💠⏸️💠 recursively call with:
+             
+            ⏸️
+                🛑 stopper-
+            ⏸️ 
+                ▶️❌⏸️🅰️⏸️♻️◀️ aggregator*curr
+            ⏸️ 
+                ▶️➕⏸️♻️⏸️1️⃣◀️  curr+1
+            ◀️
+        🔚 if end
+    🔚 function end
+⏹️
+let's wrap it up nicely into an easy to use function
+❗⬅️🆕🅰️➡️▶️💠⏸️💠⏸️🅰️⏸️1️⃣⏸️1️⃣◀️🔚⏹️
+and define a 'print factorial' function while we're at it
+🖨️❗⬅️🆕🅰️➡️▶️🖨️⏸️▶️❗⏸️🅰️◀️◀️🔚⏹️
+
+let's now print a factorial of the user input!
+
+🕳️⬅️▶️🖨️❗⏸️▶️📖1️⃣⏸️🧵Input n: 🧵◀️◀️⏹️

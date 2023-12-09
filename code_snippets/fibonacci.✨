@@ -1,0 +1,32 @@
+💠⬅️ fibonacci function (recursive)
+    🆕 function definition
+        💠⏸️
+        🛑⏸️ stopper
+        🅰️⏸️ prev
+        🅱️ curr
+    ➡️ function body
+        ❓ if
+            ▶️⚖️⏸️🛑⏸️0️⃣◀️  stopper is 0:
+        ⏸️ then
+            🅰️ prev
+        ⏸️ else:
+            ▶️💠⏸️💠 recursively call with:
+             
+            ⏸️
+                ▶️➖⏸️🛑⏸️1️⃣◀️ stopper-1
+            ⏸️ 
+                🅱️ curr
+            ⏸️ 
+                ▶️➕⏸️🅰️⏸️🅱️◀️  prev+curr
+            ◀️
+        🔚 if end
+    🔚 function end
+⏹️
+let's wrap it up nicely into an easy to use function
+🌀⬅️🆕🅰️➡️▶️💠⏸️💠⏸️🅰️⏸️0️⃣⏸️1️⃣◀️🔚⏹️
+and define a 'print fibonacci' function while we're at it
+🖨️🌀⬅️🆕🅰️➡️▶️🖨️⏸️▶️🌀⏸️🅰️◀️◀️🔚⏹️
+
+let's now print a Nth (user-defined) fibonacci number!
+
+🕳️⬅️▶️🖨️🌀⏸️▶️📖1️⃣⏸️🧵Input n: 🧵◀️◀️⏹️
