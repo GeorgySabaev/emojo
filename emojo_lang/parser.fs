@@ -9,12 +9,12 @@ type CalcNumType =
 type CalcNode =
         | CalcNum of CalcNumType
         | CalcIdentifier of string
-        | CalcExpression of oper: string * args: CalcNode list
+        | CalcExpression of oper: CalcNode * args: CalcNode list
         | CalcFunction of args: string list * CalcNode
+        | CalcBranching of CalcNode * CalcNode * CalcNode
         | CalcString of string
         | CalcBuiltin of (list<CalcNode> -> CalcNode)
         | CalcNone
-
 module constants = 
     let digits = ["0️⃣"; "1️⃣"; "2️⃣"; "3️⃣"; "4️⃣"; "5️⃣"; "6️⃣"; "7️⃣"; "8️⃣"; "9️⃣"]
     let lbracket = "▶️"
@@ -25,8 +25,12 @@ module constants =
     let ignore = "🕳️"
     let none = "💩"
     let assignment = "⬅️"
+    let arrow = "➡️"
     let linebreak = "⏹️"
-    let reserved = [lbracket; rbracket; dot; sbracket; comma; ignore; none; assignment; linebreak]
+    let func_start = "🆕"
+    let e_end = "🔚"
+    let e_if = "❓"
+    let reserved = [lbracket; rbracket; dot; sbracket; comma; ignore; none; assignment; linebreak; func_start; e_end; arrow; e_if;]
 
 let emoji = List.map string (Seq.toList Emoji.All)
 //let emoji = Set.union (Set (List.map string (Seq.toList Emoji.All))) (Set constants.reserved)
@@ -70,11 +74,20 @@ let pcalcnode, pcalcnoderef = createParserForwardedToRef<CalcNode, unit>()
 
 let pcalcint = peint |>> CalcInt |>> CalcNum
 let pcalcfloat = pefloat |>> CalcFloat |>> CalcNum
-let pcalcoperator = pstring constants.lbracket >>. (psearchfor pidentifier_raw) .>>. many1 (attempt <| ((psearchfor(pstring constants.comma)) >>. (psearchfor pcalcnode))) .>> (psearchfor (pstring constants.rbracket)) |>> CalcExpression
-
+let parglist = (psearchfor pidentifier_raw) .>>. many (attempt <| ((psearchfor(pstring constants.comma)) >>. (psearchfor pidentifier_raw))) |>> fun x -> fst x::(snd x)
+let pcalcfunction = pstring constants.func_start >>. parglist .>> (psearchfor(pstring constants.arrow)) .>>. psearchfor pcalcnode .>> (psearchfor(pstring constants.e_end)) |>> CalcFunction
+let pcalcoperator = pstring constants.lbracket >>. (psearchfor (pidentifier <|> pcalcfunction)) .>>. many1 (attempt <| ((psearchfor(pstring constants.comma)) >>. (psearchfor pcalcnode))) .>> (psearchfor (pstring constants.rbracket)) |>> CalcExpression
+let flatten ((a, b), c) =(a, b, c)
+let pcalcbranching = pstring constants.e_if >>. 
+                        psearchfor pcalcnode .>>(psearchfor(pstring constants.comma)) .>>. 
+                        psearchfor pcalcnode .>>(psearchfor(pstring constants.comma)) .>>. 
+                        psearchfor pcalcnode .>> 
+                        (psearchfor <| pstring constants.e_end) |>> flatten |>> CalcBranching
 let passign = pstring constants.assignment 
+
 let pstore = pidentifier 
 let pignore = pstring constants.ignore  |>> fun x -> CalcNone
+
 
 let pcalcprefix_raw = choice (List.map (attempt)
     [
@@ -92,11 +105,21 @@ do pcalcnoderef.Value <- choice (List.map attempt
         pestring;
         pidentifier;
         pcalcoperator;
+        pcalcfunction;
+        pcalcbranching;
     ])
 
 let pcalcline = (psearchfor pcalcprefix) .>>. (psearchfor pcalcnode) .>> psearchfor (pstring constants.linebreak) .>> (pcomment <|> eof)
 let build_ast line = 
     let r = run pcalcline line 
+    match r with
+    | Success(result, _, _)   -> result
+    | Failure(errorMsg, _, _) -> failwith errorMsg
+
+let pcalcprogram = many pcalcline
+
+let parse_program line = 
+    let r = run pcalcprogram line 
     match r with
     | Success(result, _, _)   -> result
     | Failure(errorMsg, _, _) -> failwith errorMsg

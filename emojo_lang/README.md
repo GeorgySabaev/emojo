@@ -20,7 +20,8 @@ The literal for an integer is a sequence of keycap digit emoji (`0️⃣`, `1️
 (ex. `4️⃣2️⃣` evaluates to `42`)
 - FLOAT: A signed 32 bit floating point number.  
 The literal for an integer is a sequence of keycap digit emoji for the whole part, followed by an `ⓕ` symbol **\[NOTE: NOT A PROPER EMOJI, SUBJECT TO CHANGE\]** and a second sequence of keycap digits for the fractional part.  
-(ex. `4️⃣2️⃣0️⃣ⓕ6️⃣9️⃣` evaluates to `420.69`)
+(ex. `4️⃣2️⃣0️⃣ⓕ6️⃣9️⃣` evaluates to `420.69`)  
+**Note: use the `➖` function (Built-in functions) to represent negative numbers.**
 - STRING: A string of characters.  
 The literal for a string of characters is the string itself, wrapped around with two string emoji (`🧵`).  
 (ex. `🧵Making this language was a mistake.🧵` evaluates to `"Making this language was a mistake."`)  
